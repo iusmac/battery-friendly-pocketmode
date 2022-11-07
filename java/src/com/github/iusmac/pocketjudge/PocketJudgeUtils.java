@@ -27,25 +27,19 @@ package com.github.iusmac.pocketjudge;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.util.Log;
 
 public class PocketJudgeUtils {
     private static final String TAG = "PocketJudge";
 
-    public static void startService(Context context) {
-        try {
-            context.startService(new Intent(context, PocketJudgeService.class));
-        } catch (Exception e) {
-            Log.d(TAG, e.getStackTrace().toString());
-        }
-
+    public static void startService(Context context, Class<?> serviceClass) {
+        context.startServiceAsUser(new Intent(context, serviceClass), UserHandle.CURRENT);
+        Log.d(TAG, "Starting "+ serviceClass.getCanonicalName());
     }
 
-    public static void stopService(Context context) {
-        try {
-            context.stopService(new Intent(context, PocketJudgeService.class));
-        } catch (Exception e) {
-            Log.d(TAG, e.getStackTrace().toString());
-        }
+    public static void stopService(Context context, Class<?> serviceClass) {
+        context.stopServiceAsUser(new Intent(context, serviceClass), UserHandle.CURRENT);
+        Log.d(TAG, "Stopping "+ serviceClass.getCanonicalName());
     }
 }

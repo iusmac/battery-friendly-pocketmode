@@ -25,59 +25,64 @@
 
 package com.github.iusmac.pocketjudge;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
-import androidx.preference.SwitchPreference;
-import android.app.ActionBar;
-import android.app.Activity;
+import androidx.preference.PreferenceManager;
+import androidx.preference.TwoStatePreference;
 
 public class PocketJudgeFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "PocketJudge";
+    private final boolean DEBUG = false;
 
-    public static final String BATTERY_POCKET_MODE = "b_pocketmode_sw_pref";
-    private SwitchPreference modeSwitch;
+    private final String KEY_POCKET_JUDGE_FOOTER = "footer_preference";
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
+    private Context mContext;
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
+    private SharedPreferences mSharedPrefs;
 
-    @SuppressLint("ResourceType")
+    private TwoStatePreference mPocketJudgePreference;
+    private Preference mFooterPref;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.layout.pocket_setting);
-        modeSwitch = (SwitchPreference) findPreference(BATTERY_POCKET_MODE);
-        modeSwitch.setOnPreferenceChangeListener(this);
+        mContext = getContext();
+        mSharedPrefs =
+            PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        addPreferencesFromResource(R.xml.pocketjudge_settings);
+
+        mPocketJudgePreference = findPreference(PocketJudge.KEY_POCKET_JUDGE_SWITCH);
+        mPocketJudgePreference.setChecked(
+                mSharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false));
+        mPocketJudgePreference.setOnPreferenceChangeListener(this);
+
+        mFooterPref = findPreference(KEY_POCKET_JUDGE_FOOTER);
+        final String title =
+                getString(R.string.pocket_judge_demo_title_cancel) + "\n" +
+                getString(R.string.pocket_judge_demo_tag_number1) +
+                getString(R.string.pocket_judge_demo_tag_cancel) + "\n" +
+                getString(R.string.pocket_judge_demo_tag_number2) +
+                getString(R.string.pocket_judge_demo_tag_cancel2);
+        mFooterPref.setTitle(title);
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        Log.d(TAG, newValue.toString());
-        boolean value = (Boolean) newValue;
-
-        if (preference.getKey().equals(BATTERY_POCKET_MODE)) {
-            SharedPreferences.Editor editor = getActivity().getSharedPreferences(BATTERY_POCKET_MODE, Activity.MODE_PRIVATE)
-                    .edit();
-            editor.putBoolean("enable", value);
-            editor.commit();
-
-            if (value) {
-                PocketUtils.startService(getContext());
-            } else {
-                PocketUtils.stopService(getContext());
-            }
+        boolean isChecked = (Boolean) newValue;
+        if (isChecked) {
+            PocketJudge.startService(mContext);
+        } else {
+            PocketJudge.stopService(mContext);
         }
+        mSharedPrefs.edit().putBoolean(
+                PocketJudge.KEY_POCKET_JUDGE_SWITCH,
+                isChecked).apply();
         return true;
     }
 }

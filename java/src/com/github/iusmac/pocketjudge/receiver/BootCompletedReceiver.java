@@ -27,22 +27,29 @@ package com.github.iusmac.pocketjudge.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.Intent;
+import android.util.Log;
 
-import com.github.iusmac.pocketjudge.PocketJudgeUtils;
-import com.github.iusmac.pocketjudge.PocketJudgeFragment;
+import androidx.preference.PreferenceManager;
+
+import com.github.iusmac.pocketjudge.PocketJudge;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
-
     private static final String TAG = "PocketJudge";
+    private static final boolean DEBUG = false;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            //just check on boot
-            boolean isEnable = context.getSharedPreferences(PocketPreferenceFragment.BATTERY_POCKET_MODE, Context.MODE_PRIVATE)
-                    .getBoolean("enable", false);
-            if (isEnable) PocketUtils.startService(context);
+        final SharedPreferences sharedPrefs =
+            PreferenceManager.getDefaultSharedPreferences(context);
+
+        final boolean isEnabled =
+            sharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false);
+        if (isEnabled) {
+            PocketJudge.startService(context);
         }
+        if (DEBUG) Log.d(TAG, "Started. Service is enabled: " +
+                Boolean.valueOf(isEnabled).toString());
     }
 }

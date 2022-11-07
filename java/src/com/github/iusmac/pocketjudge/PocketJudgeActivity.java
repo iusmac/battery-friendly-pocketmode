@@ -25,25 +25,17 @@
 
 package com.github.iusmac.pocketjudge;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 import com.android.settingslib.collapsingtoolbar.R;
 
 public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
+    private final String TAG = getClass().getName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.content_frame);
-        PocketPreferenceFragment pocketPreferenceFragment;
-        if (fragment == null) {
-            pocketPreferenceFragment = new PocketPreferenceFragment();
-            getFragmentManager().beginTransaction()
-                    .add(R.id.content_frame, pocketPreferenceFragment)
-                    .commit();
-        }
+        getFragmentManager().beginTransaction().replace(R.id.content_frame,
+                new PocketJudgeFragment(), TAG).commit();
     }
 }

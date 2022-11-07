@@ -34,18 +34,14 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <protected-broadcast android:name="com.android.systemui.doze.pulse" />
 
     <uses-sdk
         android:minSdkVersion="30"
         android:targetSdkVersion="30" />
 
     <application
-        android:label="@string/pocketmode_short_title"
+        android:label="@string/pocket_judge_title"
         android:persistent="true">
 
         <receiver android:name=".receiver.BootCompletedReceiver"
@@ -72,7 +68,7 @@
         <!-- use theme as setting remove android:theme if not need it -->
         <activity
             android:name=".PocketJudgeActivity"
-            android:label="@string/pocketmode_short_title"
+            android:label="@string/pocket_judge_title"
             android:theme="@style/Theme.SubSettingsBase"
             android:exported="true">
             <intent-filter>
@@ -84,7 +80,7 @@
                 android:value="com.android.settings.category.ia.display" />
             <meta-data
                 android:name="com.android.settings.summary"
-                android:resource="@string/pocketmode_summary" />
+                android:resource="@string/pocket_judge_summary" />
         </activity>
 
     </application>
