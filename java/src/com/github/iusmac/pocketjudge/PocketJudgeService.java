@@ -26,6 +26,9 @@
 package com.github.iusmac.pocketjudge;
 
 import android.app.KeyguardManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -54,6 +57,9 @@ public class PocketJudgeService extends Service {
     private static final int EVENT_TURN_ON_SCREEN = 1;
     private static final int EVENT_TURN_OFF_SCREEN = 0;
 
+    private static final int NOTIFICATION_ID = 0x110110;
+    public static final String NOTIFICATION_CHANNEL = "pocketjudge_notification_channel";
+    private NotificationManager mNotificationManager = null;
     private Thread mSafeDoorThread = null;
     private boolean mIsSafeDoorThreadExit = false;
 
@@ -85,6 +91,16 @@ public class PocketJudgeService extends Service {
 
         mKeyguardManager = (KeyguardManager)
             mContext.getSystemService(Context.KEYGUARD_SERVICE);
+
+        mNotificationManager = (NotificationManager)
+            mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationChannel notificationChannel = new
+            NotificationChannel(NOTIFICATION_CHANNEL,
+                    mContext.getString(R.string.pocket_judge_title),
+                    NotificationManager.IMPORTANCE_HIGH);
+        notificationChannel.setSound(null, null);
+        mNotificationManager.createNotificationChannel(notificationChannel);
     }
 
     @Override
@@ -109,8 +125,35 @@ public class PocketJudgeService extends Service {
         return mExecutorService.submit(runnable);
     }
 
+    private void showNotification() {
+        Notification.Builder notificationBuilder;
+        notificationBuilder = new Notification.Builder(mContext,
+                NOTIFICATION_CHANNEL);
+
+        notificationBuilder.setSmallIcon(R.drawable.ic_pocket)
+            .setShowWhen(false)
+            .setAutoCancel(true)
+            .setOngoing(true)
+            .setContentTitle(mContext
+                    .getString(R.string.pocket_judge_notif_title))
+            .setContentText(mContext
+                    .getString(R.string.pocket_judge_notif_msg));
+
+        Notification n = notificationBuilder.build();
+        mNotificationManager.notify(NOTIFICATION_ID, n);
+    }
+
+    private void removeNotification() {
+        mNotificationManager.cancelAll();
+    }
+
     private void setInPocket(boolean active) {
         PocketJudge.setInPocket(active);
+        if (active) {
+            showNotification();
+        } else {
+            removeNotification();
+        }
     }
 
     private void disableSensor() {
