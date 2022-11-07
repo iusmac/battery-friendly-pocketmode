@@ -2,6 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+ *               2022 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.maytinhdibo.pocket;
 
-import android.app.Fragment;
-import android.os.Bundle;
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
-import com.android.settingslib.collapsingtoolbar.R;
+package com.github.iusmac.pocketjudge;
 
-public class PocketPreferenceActivity extends CollapsingToolbarBaseActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+public class PocketJudgeUtils {
+    private static final String TAG = "PocketJudge";
 
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.content_frame);
-        PocketPreferenceFragment pocketPreferenceFragment;
-        if (fragment == null) {
-            pocketPreferenceFragment = new PocketPreferenceFragment();
-            getFragmentManager().beginTransaction()
-                    .add(R.id.content_frame, pocketPreferenceFragment)
-                    .commit();
+    public static void startService(Context context) {
+        try {
+            context.startService(new Intent(context, PocketJudgeService.class));
+        } catch (Exception e) {
+            Log.d(TAG, e.getStackTrace().toString());
+        }
+
+    }
+
+    public static void stopService(Context context) {
+        try {
+            context.stopService(new Intent(context, PocketJudgeService.class));
+        } catch (Exception e) {
+            Log.d(TAG, e.getStackTrace().toString());
         }
     }
 }

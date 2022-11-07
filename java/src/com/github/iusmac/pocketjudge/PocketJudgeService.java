@@ -2,6 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+ *               2022 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +23,7 @@
  * SOFTWARE.
  */
 
-package io.github.maytinhdibo.pocket;
+package com.github.iusmac.pocketjudge;
 
 import android.app.AlarmManager;
 import android.app.Service;
@@ -41,9 +42,9 @@ import android.util.Log;
 
 import io.github.maytinhdibo.pocket.receiver.PhoneStateReceiver;
 
-public class PocketService extends Service {
-    private static final String TAG = "PocketMode";
-    private static final boolean DEBUG = true;
+public class PocketJudgeService extends Service {
+    private static final String TAG = "PocketJudge";
+    private static final boolean DEBUG = false;
 
     private static final int EVENT_UNLOCK = 2;
     private static final int EVENT_TURN_ON_SCREEN = 1;

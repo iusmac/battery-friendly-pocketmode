@@ -2,6 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+ *               2022 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +23,32 @@
  * SOFTWARE.
  */
 
-package io.github.maytinhdibo.pocket;
+package com.github.iusmac.pocketjudge.receiver;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class PocketUtils {
-    private static final String TAG = "PocketMode";
+public class PhoneStateReceiver extends BroadcastReceiver {
 
-    public static void startService(Context context) {
-        try {
-            context.startService(new Intent(context, PocketService.class));
-        } catch (Exception e) {
-            Log.d(TAG, e.getStackTrace().toString());
-        }
+    private static final String TAG = "PocketJudge";
+    public final static int IN_CALL = 1; //while ringing or calling
+    public final static int IDLE = 0;
 
-    }
+    public static int CUR_STATE = IDLE;
 
-    public static void stopService(Context context) {
-        try {
-            context.stopService(new Intent(context, PocketService.class));
-        } catch (Exception e) {
-            Log.d(TAG, e.getStackTrace().toString());
+    @Override
+    public void onReceive(final Context context, Intent intent) {
+        String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+        Log.d(TAG, state);
+
+        if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)
+                || state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+            CUR_STATE = PhoneStateReceiver.IN_CALL;
+        } else if (state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+            CUR_STATE = PhoneStateReceiver.IDLE;
         }
     }
 }

@@ -4,6 +4,7 @@
   ~ MIT License
   ~
   ~ Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+  ~               2022 iusmac <iusico.maxim@libero.it>
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +26,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.github.maytinhdibo.pocket"
+    package="com.github.iusmac.pocketjudge"
     android:sharedUserId="android.uid.system"
     android:versionCode="1"
     android:versionName="1.0">
@@ -40,21 +41,23 @@
     <protected-broadcast android:name="com.android.systemui.doze.pulse" />
 
     <uses-sdk
-        android:minSdkVersion="24"
-        android:targetSdkVersion="24" />
+        android:minSdkVersion="30"
+        android:targetSdkVersion="30" />
 
     <application
         android:label="@string/pocketmode_short_title"
         android:persistent="true">
 
-        <receiver android:name=".receiver.BootCompletedReceiver">
+        <receiver android:name=".receiver.BootCompletedReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receiver.PhoneStateReceiver">
+        <receiver android:name=".receiver.PhoneStateReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -62,14 +65,16 @@
         </receiver>
 
         <service
-            android:name=".PocketService"
-            android:permission="PocketService"></service>
+            android:name=".PocketJudgeService"
+            android:exported="false">
+        </service>
 
         <!-- use theme as setting remove android:theme if not need it -->
         <activity
-            android:name=".PocketPreferenceActivity"
+            android:name=".PocketJudgeActivity"
             android:label="@string/pocketmode_short_title"
-            android:theme="@style/Theme.SubSettingsBase">
+            android:theme="@style/Theme.SubSettingsBase"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.settings.action.IA_SETTINGS" />
             </intent-filter>

@@ -2,6 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+ *               2022 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +23,18 @@
  * SOFTWARE.
  */
 
-package io.github.maytinhdibo.pocket.receiver;
+package com.github.iusmac.pocketjudge.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import io.github.maytinhdibo.pocket.PocketUtils;
-import io.github.maytinhdibo.pocket.PocketPreferenceFragment;
+import com.github.iusmac.pocketjudge.PocketJudgeUtils;
+import com.github.iusmac.pocketjudge.PocketJudgeFragment;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "PocketMode";
+    private static final String TAG = "PocketJudge";
 
     @Override
     public void onReceive(final Context context, Intent intent) {

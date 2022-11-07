@@ -1,5 +1,5 @@
 android_app {
-    name: "PocketMode",
+    name: "PocketJudge",
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],

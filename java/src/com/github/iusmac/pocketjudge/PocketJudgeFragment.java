@@ -2,6 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
+ *               2022 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +23,7 @@
  * SOFTWARE.
  */
 
-package io.github.maytinhdibo.pocket;
+package com.github.iusmac.pocketjudge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -35,9 +36,9 @@ import androidx.preference.SwitchPreference;
 import android.app.ActionBar;
 import android.app.Activity;
 
-public class PocketPreferenceFragment extends PreferenceFragment
+public class PocketJudgeFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener {
-    private static final String TAG = "PocketMode";
+    private static final String TAG = "PocketJudge";
 
     public static final String BATTERY_POCKET_MODE = "b_pocketmode_sw_pref";
     private SwitchPreference modeSwitch;
