@@ -30,6 +30,13 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class PocketJudgeUtils {
     private static final String TAG = "PocketJudge";
 
@@ -41,5 +48,53 @@ public class PocketJudgeUtils {
     public static void stopService(Context context, Class<?> serviceClass) {
         context.stopServiceAsUser(new Intent(context, serviceClass), UserHandle.CURRENT);
         Log.d(TAG, "Stopping "+ serviceClass.getCanonicalName());
+    }
+
+    /**
+     * Write a string value to the specified file.
+     *
+     * @param filename The filename
+     * @param value    The value
+     */
+    public static void writeValue(String filename, String value) {
+        if (filename == null) {
+            return;
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(filename));
+            fos.write(value.getBytes());
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String readLine(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        BufferedReader br = null;
+        String line = null;
+        try {
+            br = new BufferedReader(new FileReader(filename), 1024);
+            line = br.readLine();
+            if (line != null) {
+                line = line.replaceAll(".+= ", "");
+            }
+        } catch (IOException e) {
+            return null;
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+        return line;
     }
 }

@@ -29,6 +29,7 @@ public class PocketJudge {
     private static final boolean DEBUG = false;
 
     public static final String KEY_POCKET_JUDGE_SWITCH = "key_pocket_judge";
+    private static final String POCKET_BRIDGE_INPOCKET_FILE = "/sys/kernel/pocket_judge/inpocket";
 
     public static void startService(final Context context) {
         PocketJudgeUtils.startService(context, PocketJudgeService.class);
@@ -36,5 +37,14 @@ public class PocketJudge {
 
     public static void stopService(final Context context) {
         PocketJudgeUtils.stopService(context, PocketJudgeService.class);
+    }
+
+    public static boolean isSafeDoorTriggered() {
+        String raw = PocketJudgeUtils.readLine(POCKET_BRIDGE_INPOCKET_FILE);
+        return "2".equals(raw);
+    }
+
+    public static void setInPocket(boolean active) {
+        PocketJudgeUtils.writeValue(POCKET_BRIDGE_INPOCKET_FILE, active ? "1" : "0");
     }
 }

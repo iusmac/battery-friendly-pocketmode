@@ -25,7 +25,6 @@
 
 package com.github.iusmac.pocketjudge;
 
-import android.app.AlarmManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,38 +35,45 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 
-import io.github.maytinhdibo.pocket.receiver.PhoneStateReceiver;
+import com.github.iusmac.pocketjudge.receiver.PhoneStateReceiver;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class PocketJudgeService extends Service {
-    private static final String TAG = "PocketJudge";
+    private static final String TAG = "PocketJudgeService";
     private static final boolean DEBUG = false;
 
     private static final int EVENT_UNLOCK = 2;
     private static final int EVENT_TURN_ON_SCREEN = 1;
     private static final int EVENT_TURN_OFF_SCREEN = 0;
 
-    private int lastAction = -1;
-    private static long nextAlarm = -1;
-    private boolean isSensorRunning = false;
+    private Thread mSafeDoorThread = null;
+    private boolean mIsSafeDoorThreadExit = false;
 
-    SensorManager sensorManager;
-    Sensor proximitySensor;
-    Context mContext;
+    private float mProximityMaxRange;
+    private int mLastAction = -1;
+    private boolean mIsSensorRunning = false;
 
-    private long lastBlock = -1;
-    private boolean isFirstChange = false;
+    private ExecutorService mExecutorService;
+    private SensorManager mSensorManager;
+    private Sensor mProximitySensor;
+    private Context mContext;
 
     @Override
     public void onCreate() {
         if (DEBUG) Log.d(TAG, "Creating service");
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mExecutorService = Executors.newSingleThreadExecutor();
+        mProximityMaxRange = mProximitySensor.getMaximumRange();
 
-        mContext = this;
+        mContext = getApplicationContext();
 
         IntentFilter screenStateFilter = new IntentFilter();
         screenStateFilter.addAction(Intent.ACTION_SCREEN_ON);
@@ -94,77 +100,142 @@ public class PocketJudgeService extends Service {
         return null;
     }
 
+    private Future<?> submit(Runnable runnable) {
+        return mExecutorService.submit(runnable);
+    }
+
+    private void setInPocket(boolean active) {
+        PocketJudge.setInPocket(active);
+    }
+
     private void disableSensor() {
-        if (!isSensorRunning) return;
-        if (DEBUG) Log.d(TAG, "Disable proximity sensor");
-        sensorManager.unregisterListener(proximitySensorEventListener, proximitySensor);
-        //mark first sensor update after disable
-        isFirstChange = true;
-        isSensorRunning = false;
+        if (!mIsSensorRunning) return;
+        if (DEBUG) Log.d(TAG, "Disabling proximity sensor");
+        submit(() -> {
+            mSensorManager.unregisterListener(mProximitySensorEventListener,
+                    mProximitySensor);
+            setInPocket(false);
+            mIsSensorRunning = false;
+            stopSafeDoorThreadPoll();
+        });
     }
 
     private void enableSensor() {
-        if (DEBUG) Log.d(TAG, "Enable proximity sensor");
-        sensorManager.registerListener(proximitySensorEventListener,
-                proximitySensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
-        isSensorRunning = true;
+        if (mIsSensorRunning) return;
+        if (DEBUG) Log.d(TAG, "Enabling proximity sensor");
+        submit(() -> {
+            mSensorManager.registerListener(mProximitySensorEventListener,
+                    mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+            mIsSensorRunning = true;
+        });
+    }
+
+    private void startSafeDoorThreadPoll() {
+        mIsSafeDoorThreadExit = false;
+        if (null != mSafeDoorThread) {
+            return;
+        }
+        mSafeDoorThread = new Thread() {
+            public void run() {
+                while (true) {
+                    if (mIsSafeDoorThreadExit) {
+                        break;
+                    }
+
+                    if (PocketJudge.isSafeDoorTriggered()) {
+                        if (DEBUG)
+                            Log.d(TAG, "Thread(): SAFE DOOR TRIGGERED, " +
+                                "force unblocking touchscreen/buttons and disable sensor");
+                        disableSensor();
+                        break;
+                    }
+
+                    try {
+                        final int hundredMillisecond = 200;
+                        Thread.sleep(hundredMillisecond);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        mSafeDoorThread.start();
+    }
+
+    private void stopSafeDoorThreadPoll() {
+        if (null != mSafeDoorThread) {
+            mIsSafeDoorThreadExit = true;
+            mSafeDoorThread = null;
+        }
     }
 
     private BroadcastReceiver mScreenStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                if (lastAction != EVENT_UNLOCK) enableSensor();
-                lastAction = EVENT_TURN_ON_SCREEN;
+                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_ON");
+                final int oldAction = mLastAction;
+                mLastAction = EVENT_TURN_ON_SCREEN;
+
+                if (oldAction != EVENT_UNLOCK) {
+                    enableSensor();
+                }
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_OFF");
+                mLastAction = EVENT_TURN_OFF_SCREEN;
                 disableSensor();
-
-                //save alarm after turn off screen
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                AlarmManager.AlarmClockInfo alarmClockInfo = alarmManager.getNextAlarmClock();
-                if (alarmClockInfo != null) nextAlarm = alarmClockInfo.getTriggerTime();
-                else nextAlarm = -1;
-
-                lastAction = EVENT_TURN_OFF_SCREEN;
             } else if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
-                //disable when unlocked
+                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_USER_PRESENT");
+                mLastAction = EVENT_UNLOCK;
                 disableSensor();
-                lastAction = EVENT_UNLOCK;
             }
         }
     };
 
-    SensorEventListener proximitySensorEventListener = new SensorEventListener() {
+    public SensorEventListener mProximitySensorEventListener = new SensorEventListener() {
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            //method to check accuracy changed in sensor.
-        }
+        public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            //check if the sensor type is proximity sensor.
-            if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-                if (event.values[0] == 0) {
-                    long timestamp = System.currentTimeMillis();
-                    if (PhoneStateReceiver.CUR_STATE == PhoneStateReceiver.IDLE
-                            && (nextAlarm == -1 || timestamp - nextAlarm > 60000)) {
-                        //stop block turn on after 15 seconds
-                        if (!(isFirstChange && (System.currentTimeMillis() - lastBlock < 15000 && lastBlock != -1))) {
-                            if (DEBUG) Log.d(TAG, "NEAR, disable sensor and turn screen off");
-                            disableSensor();
-                            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-                            if (pm != null) {
-                                pm.goToSleep(SystemClock.uptimeMillis());
-                                lastBlock = System.currentTimeMillis();
+            try {
+                if (event == null) {
+                    if (DEBUG) Log.d(TAG, "Event is null!");
+                } else if (event.values == null || event.values.length == 0) {
+                    if (DEBUG)
+                        Log.d(TAG, "Event has no values! event.values null ? " +
+                                (event.values == null));
+                } else {
+                    final float value = event.values[0];
+                    final boolean isPositive = event.values[0] < mProximityMaxRange;
+                    if (DEBUG) {
+                        final long time = SystemClock.uptimeMillis();
+                        Log.d(TAG, "Event: time=" + time + ", value=" + value
+                                + ", maxRange=" + mProximityMaxRange + ", isPositive=" + isPositive);
+                    }
+                    if (isPositive) {
+                        if (PhoneStateReceiver.CUR_STATE ==
+                                PhoneStateReceiver.IDLE) {
+                            if (DEBUG) Log.d(TAG, "onSensorChanged(): COVERED, " +
+                                    "blocking touchscreen and buttons");
+                            setInPocket(true);
+
+                            // We're in pocket, start listen for safe-door
+                            // state
+                            if (null == mSafeDoorThread) {
+                                startSafeDoorThreadPoll();
                             }
                         }
+                    } else {
+                        if (DEBUG) Log.d(TAG, "onSensorChanged(): UNCOVERED, " +
+                                "unblocking touchscreen and buttons");
+                        setInPocket(false);
                     }
-                } else {
-                    if (DEBUG) Log.d(TAG, "FAR");
                 }
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Event: something went wrong, exception caught, e = " + e);
+                setInPocket(false);
             }
-            isFirstChange = false;
         }
     };
 }
