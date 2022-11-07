@@ -25,6 +25,7 @@
 
 package com.github.iusmac.pocketjudge;
 
+import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -64,6 +65,7 @@ public class PocketJudgeService extends Service {
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
     private Context mContext;
+    private KeyguardManager mKeyguardManager;
 
     @Override
     public void onCreate() {
@@ -80,6 +82,9 @@ public class PocketJudgeService extends Service {
         screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF);
         screenStateFilter.addAction(Intent.ACTION_USER_PRESENT);
         registerReceiver(mScreenStateReceiver, screenStateFilter);
+
+        mKeyguardManager = (KeyguardManager)
+            mContext.getSystemService(Context.KEYGUARD_SERVICE);
     }
 
     @Override
@@ -177,7 +182,12 @@ public class PocketJudgeService extends Service {
                 final int oldAction = mLastAction;
                 mLastAction = EVENT_TURN_ON_SCREEN;
 
-                if (oldAction != EVENT_UNLOCK) {
+                if (!mKeyguardManager.isKeyguardLocked()
+                        || oldAction == EVENT_UNLOCK) {
+                    if (DEBUG) Log.d(TAG,
+                            "ACTION_SCREEN_ON: Screen is on but no keyguard. " +
+                            "Skipping sensor enable");
+                } else {
                     enableSensor();
                 }
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
