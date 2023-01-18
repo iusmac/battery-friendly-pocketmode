@@ -36,8 +36,7 @@ This pocket mode implementation is a fork of [Battery-friendly Pocketmode](https
     PRODUCT_PACKAGES += \
         PocketJudge
     ```
-4. Copy R/W access and ownership rules from the `init.rc` file to your DT `rootdir/` directory
-5. Pick SELinux policies from `sepolicy/` directory to your DT `sepolicy/` directory.
+4. Pick SELinux policies from `sepolicy/` directory to your DT `sepolicy/` directory.
 
 _See implementation example into XiaomiParts:_ [here](https://github.com/iusmac/device_rova/commit/de14e4803bb01a0cc4b19462dd1cdcdab20daa89)
 

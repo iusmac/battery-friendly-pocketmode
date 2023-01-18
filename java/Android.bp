@@ -18,4 +18,15 @@ android_app {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
+
+    required: [
+        "vendor.com.github.iusmac.pocketjudge.rc",
+    ],
+}
+
+prebuilt_etc {
+    name: "vendor.com.github.iusmac.pocketjudge.rc",
+    src: "vendor.com.github.iusmac.pocketjudge.rc",
+    sub_dir: "init",
+    vendor: true,
 }
