@@ -36,7 +36,10 @@ public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(R.id.content_frame,
-                new PocketJudgeFragment(), TAG).commit();
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.content_frame,
+                    new PocketJudgeFragment(), TAG).commit();
+        }
     }
 }

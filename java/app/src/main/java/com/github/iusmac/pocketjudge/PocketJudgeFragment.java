@@ -31,13 +31,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.TwoStatePreference;
 
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
 
-public class PocketJudgeFragment extends PreferenceFragment
+public class PocketJudgeFragment extends PreferenceFragmentCompat
         implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "PocketJudge";
 
