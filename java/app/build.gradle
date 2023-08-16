@@ -64,7 +64,6 @@ dependencies {
     implementation libs.core
     implementation libs.preference
 
-    compileOnly project(path: ':lineage-sdk:sdk')
     implementation project(path: ':SettingsLib:CollapsingToolbarBaseActivity')
     implementation project(path: ':SettingsLib:FooterPreference')
     implementation project(path: ':SettingsLib:LayoutPreference')

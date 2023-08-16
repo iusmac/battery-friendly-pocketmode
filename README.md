@@ -20,7 +20,7 @@ This pocket mode implementation is a fork of [Battery-friendly Pocketmode](https
 **So, what's done in this implementation:**
 1. The screen isn't turned off when proximity sensor is positive but instead, we tell the kernel to ignore touchscreen, HW buttons, fingerprint, slider etc., as if they are physically absent
 2. Available in 36 languages upon release
-3. Volume keys force wake screen if volume buttons should not seek media tracks
+3. Volume keys force wake screen if volume buttons should not seek media tracks (_LineageOS-based ROMs only_)
 4. The user receives a silent, but a high importance notification on pocket mode being active
 5. Pocket mode can be temporarily suspended until next screen on/off cycle by pressing and holding the power button for at least 2 seconds (by default).
 6. No "sluggish" reaction or unpredictable behavior. High responsiveness and accuracy thanks to the kernel driver
@@ -55,19 +55,6 @@ _See implementation example into XiaomiParts:_ [here](https://github.com/iusmac/
 </details>
 
 ## ROM adaptations
-<details>
-    <summary>error: "<b>PocketJudge</b>" depends on undefined module "<b>org.lineageos.platform.internal</b>"</summary>
-
-By default, we try to unconditionally use volume keys to force wake screen if volume buttons should not seek media tracks. This helps to prevent the music volume from changing while in pocket. Unfortunately, this feature is available on LineageOS-based ROMs only. If you're building an AOSP-based ROM, then you may encounter the following compilation error:
-```console
-error: "PocketJudge" depends on undefined module "org.lineageos.platform.internal"
-```
-To fix it, revert the following commit:
-```console
-273586d java: Use volume keys (if possible) to wake screen
-```
-</details>
-
 <details>
     <summary><b>ERROR</b> '<em>Duplicate declaration of type</em>' at token</summary>
 
