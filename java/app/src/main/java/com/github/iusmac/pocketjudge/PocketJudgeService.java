@@ -2,7 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
- *               2022 iusmac <iusico.maxim@libero.it>
+ *               2022,2023 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,9 +51,10 @@ import java.util.concurrent.Future;
 
 import lineageos.providers.LineageSettings;
 
+import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
+
 public class PocketJudgeService extends Service {
     private static final String TAG = "PocketJudgeService";
-    private static final boolean DEBUG = false;
 
     private static final int EVENT_UNLOCK = 2;
     private static final int EVENT_TURN_ON_SCREEN = 1;

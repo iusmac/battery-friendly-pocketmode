@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 iusmac <iusico.maxim@libero.it>
+ * Copyright (C) 2022,2023 iusmac <iusico.maxim@libero.it>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,10 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
+import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
+
 public class PocketJudge {
     private static final String TAG = "PocketJudge";
-    private static final boolean DEBUG = false;
 
     public static final String KEY_POCKET_JUDGE_SWITCH = "key_pocket_judge";
     private static final String POCKET_BRIDGE_INPOCKET_FILE = "/sys/kernel/pocket_judge/inpocket";

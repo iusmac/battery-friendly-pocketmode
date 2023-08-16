@@ -1,7 +1,14 @@
 android_app {
     name: "PocketJudge",
 
-    srcs: ["src/**/*.java"],
+    min_sdk_version: "30",
+    target_sdk_version: "33",
+
+    srcs: [
+        "java/**/*.java",
+        "gen/**/*.java",
+
+    ],
     resource_dirs: ["res"],
     certificate: "platform",
     platform_apis: true,

@@ -23,20 +23,34 @@
  * SOFTWARE.
  */
 
-package com.github.iusmac.pocketjudge;
+package com.github.iusmac.pocketjudge.receiver;
 
-import android.os.Bundle;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.Intent;
+import android.util.Log;
 
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
-import com.android.settingslib.widget.R;
+import androidx.preference.PreferenceManager;
 
-public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
-    private final String TAG = getClass().getName();
+import com.github.iusmac.pocketjudge.PocketJudge;
+
+import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
+
+public class BootCompletedReceiver extends BroadcastReceiver {
+    private static final String TAG = "PocketJudge";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(R.id.content_frame,
-                new PocketJudgeFragment(), TAG).commit();
+    public void onReceive(final Context context, Intent intent) {
+        final SharedPreferences sharedPrefs =
+            PreferenceManager.getDefaultSharedPreferences(context);
+
+        final boolean isEnabled =
+            sharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false);
+        if (isEnabled) {
+            PocketJudge.startService(context);
+        }
+        if (DEBUG) Log.d(TAG, "Started. Service is enabled: " +
+                Boolean.valueOf(isEnabled).toString());
     }
 }

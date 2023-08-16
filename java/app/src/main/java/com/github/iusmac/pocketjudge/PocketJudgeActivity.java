@@ -2,7 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
- *               2022 iusmac <iusico.maxim@libero.it>
+ *               2022,2023 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,33 +23,20 @@
  * SOFTWARE.
  */
 
-package com.github.iusmac.pocketjudge.receiver;
+package com.github.iusmac.pocketjudge;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.Intent;
-import android.util.Log;
+import android.os.Bundle;
 
-import androidx.preference.PreferenceManager;
+import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
+import com.android.settingslib.widget.R;
 
-import com.github.iusmac.pocketjudge.PocketJudge;
-
-public class BootCompletedReceiver extends BroadcastReceiver {
-    private static final String TAG = "PocketJudge";
-    private static final boolean DEBUG = false;
+public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
+    private final String TAG = getClass().getName();
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
-        final SharedPreferences sharedPrefs =
-            PreferenceManager.getDefaultSharedPreferences(context);
-
-        final boolean isEnabled =
-            sharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false);
-        if (isEnabled) {
-            PocketJudge.startService(context);
-        }
-        if (DEBUG) Log.d(TAG, "Started. Service is enabled: " +
-                Boolean.valueOf(isEnabled).toString());
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getFragmentManager().beginTransaction().replace(R.id.content_frame,
+                new PocketJudgeFragment(), TAG).commit();
     }
 }

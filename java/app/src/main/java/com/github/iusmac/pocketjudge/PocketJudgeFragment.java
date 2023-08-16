@@ -2,7 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2021 Trần Mạnh Cường <maytinhdibo>
- *               2022 iusmac <iusico.maxim@libero.it>
+ *               2022,2023 iusmac <iusico.maxim@libero.it>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,10 +35,11 @@ import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceManager;
 import androidx.preference.TwoStatePreference;
 
+import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
+
 public class PocketJudgeFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "PocketJudge";
-    private final boolean DEBUG = false;
 
     private final String KEY_POCKET_JUDGE_FOOTER = "footer_preference";
 
