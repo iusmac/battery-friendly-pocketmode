@@ -68,7 +68,7 @@ public class PocketJudgeService extends Service {
     private boolean mVolumeWakeScreenEnabled = false;
 
     private Thread mSafeDoorThread = null;
-    private boolean mIsSafeDoorThreadExit = false;
+    private volatile boolean mIsSafeDoorThreadExit = false;
 
     private float mProximityMaxRange;
     private int mLastAction = -1;
