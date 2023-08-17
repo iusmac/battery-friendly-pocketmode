@@ -26,7 +26,6 @@
 package com.github.iusmac.pocketjudge;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -45,22 +44,16 @@ public class PocketJudgeFragment extends PreferenceFragmentCompat
 
     private Context mContext;
 
-    private SharedPreferences mSharedPrefs;
-
     private TwoStatePreference mPocketJudgePreference;
     private Preference mFooterPref;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         mContext = getContext();
-        mSharedPrefs =
-            PreferenceManager.getDefaultSharedPreferences(mContext);
 
         addPreferencesFromResource(R.xml.pocketjudge_settings);
 
         mPocketJudgePreference = findPreference(PocketJudge.KEY_POCKET_JUDGE_SWITCH);
-        mPocketJudgePreference.setChecked(
-                mSharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false));
         mPocketJudgePreference.setOnPreferenceChangeListener(this);
 
         mFooterPref = findPreference(KEY_POCKET_JUDGE_FOOTER);
@@ -81,9 +74,6 @@ public class PocketJudgeFragment extends PreferenceFragmentCompat
         } else {
             PocketJudge.stopService(mContext);
         }
-        mSharedPrefs.edit().putBoolean(
-                PocketJudge.KEY_POCKET_JUDGE_SWITCH,
-                isChecked).apply();
         return true;
     }
 }
