@@ -38,18 +38,20 @@
 
     <application
         android:label="@string/pocket_judge_title"
+        android:defaultToDeviceProtectedStorage="true"
         android:persistent="true">
 
         <receiver android:name=".receiver.BootCompletedReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT" />
+            android:exported="false"
+            android:directBootAware="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
         <receiver android:name=".receiver.PhoneStateReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -58,7 +60,8 @@
 
         <service
             android:name=".PocketJudgeService"
-            android:exported="false">
+            android:exported="false"
+            android:directBootAware="true">
         </service>
 
         <!-- use theme as setting remove android:theme if not need it -->
