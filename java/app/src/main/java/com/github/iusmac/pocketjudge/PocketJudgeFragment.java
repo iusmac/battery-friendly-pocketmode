@@ -34,13 +34,21 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.TwoStatePreference;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+import javax.inject.Inject;
+
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
 
-public class PocketJudgeFragment extends PreferenceFragmentCompat
+@AndroidEntryPoint(PreferenceFragmentCompat.class)
+public class PocketJudgeFragment extends Hilt_PocketJudgeFragment
         implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "PocketJudge";
 
     private final String KEY_POCKET_JUDGE_FOOTER = "footer_preference";
+
+    @Inject
+    PocketJudge mPocketJudge;
 
     private Context mContext;
 
@@ -70,9 +78,9 @@ public class PocketJudgeFragment extends PreferenceFragmentCompat
     public boolean onPreferenceChange(final Preference preference, final Object newValue) {
         final boolean isChecked = (Boolean) newValue;
         if (isChecked) {
-            PocketJudge.startService(mContext);
+            mPocketJudge.startService();
         } else {
-            PocketJudge.stopService(mContext);
+            mPocketJudge.stopService();
         }
         return true;
     }

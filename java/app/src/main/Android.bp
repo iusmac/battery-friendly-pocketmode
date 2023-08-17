@@ -21,6 +21,7 @@ android_app {
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibFooterPreference",
         "SettingsLibLayoutPreference",
+        "hilt_android",
     ],
 
     optimize: {

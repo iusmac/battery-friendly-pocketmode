@@ -31,24 +31,32 @@ import android.content.SharedPreferences;
 import android.content.Intent;
 import android.util.Log;
 
-import androidx.preference.PreferenceManager;
-
 import com.github.iusmac.pocketjudge.PocketJudge;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+import javax.inject.Inject;
 
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
 
-public class BootCompletedReceiver extends BroadcastReceiver {
+@AndroidEntryPoint(BroadcastReceiver.class)
+public class BootCompletedReceiver extends Hilt_BootCompletedReceiver {
     private static final String TAG = "PocketJudge";
+
+    @Inject
+    SharedPreferences mSharedPrefs;
+
+    @Inject
+    PocketJudge mPocketJudge;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        final SharedPreferences sharedPrefs =
-            PreferenceManager.getDefaultSharedPreferences(context);
+        super.onReceive(context, intent);
 
         final boolean isEnabled =
-            sharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false);
+            mSharedPrefs.getBoolean(PocketJudge.KEY_POCKET_JUDGE_SWITCH, false);
         if (isEnabled) {
-            PocketJudge.startService(context);
+            mPocketJudge.startService();
         }
         if (DEBUG) Log.d(TAG, "Started. Service is enabled: " +
                 Boolean.valueOf(isEnabled).toString());

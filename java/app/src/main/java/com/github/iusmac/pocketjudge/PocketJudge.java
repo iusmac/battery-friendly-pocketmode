@@ -24,7 +24,11 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
+import dagger.hilt.android.qualifiers.ApplicationContext;
+
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
+
+import javax.inject.Inject;
 
 public class PocketJudge {
     private static final String TAG = "PocketJudge";
@@ -32,15 +36,22 @@ public class PocketJudge {
     public static final String KEY_POCKET_JUDGE_SWITCH = "key_pocket_judge";
     private static final String POCKET_BRIDGE_INPOCKET_FILE = "/sys/kernel/pocket_judge/inpocket";
 
-    public static void startService(final Context context) {
-        PocketJudgeUtils.startService(context, PocketJudgeService.class);
+    private final Context mContext;
+
+    @Inject
+    public PocketJudge(final @ApplicationContext Context context) {
+        mContext = context;
     }
 
-    public static void stopService(final Context context) {
-        PocketJudgeUtils.stopService(context, PocketJudgeService.class);
+    public void startService() {
+        PocketJudgeUtils.startService(mContext, PocketJudgeService.class);
     }
 
-    public static boolean isSafeDoorTriggered() {
+    public void stopService() {
+        PocketJudgeUtils.stopService(mContext, PocketJudgeService.class);
+    }
+
+    public boolean isSafeDoorTriggered() {
         final String raw = PocketJudgeUtils.readLine(POCKET_BRIDGE_INPOCKET_FILE);
         return "2".equals(raw);
     }

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id 'com.android.application'
+    id 'kotlin-kapt'
     id 'org.jetbrains.kotlin.android'
 }
 
@@ -64,6 +65,9 @@ dependencies {
     implementation libs.core
     implementation libs.preference
 
+    implementation libs.hilt_android
+    kapt libs.hilt_compiler
+
     implementation project(path: ':SettingsLib:CollapsingToolbarBaseActivity')
     implementation project(path: ':SettingsLib:FooterPreference')
     implementation project(path: ':SettingsLib:LayoutPreference')
@@ -84,4 +88,8 @@ dependencies {
             because('kotlin-stdlib-jdk8 is now a part of kotlin-stdlib')
         }
     }
+}
+
+kapt {
+    correctErrorTypes true
 }

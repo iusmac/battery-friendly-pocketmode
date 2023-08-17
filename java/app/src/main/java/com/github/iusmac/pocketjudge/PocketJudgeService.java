@@ -45,11 +45,17 @@ import android.util.Log;
 
 import com.github.iusmac.pocketjudge.receiver.PhoneStateReceiver;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import lineageos.providers.LineageSettings;
 
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
 
-public class PocketJudgeService extends Service {
+@AndroidEntryPoint(Service.class)
+public class PocketJudgeService extends Hilt_PocketJudgeService {
     private static final String TAG = "PocketJudgeService";
 
     private static final int EVENT_UNLOCK = 2;
@@ -58,7 +64,6 @@ public class PocketJudgeService extends Service {
 
     private static final int NOTIFICATION_ID = 0x110110;
     private static final String NOTIFICATION_CHANNEL = "pocketjudge_notification_channel";
-    private NotificationManager mNotificationManager;
 
     private boolean mVolBtnMusicControlsEnabled;
     private boolean mVolumeWakeScreenEnabled;
@@ -70,16 +75,27 @@ public class PocketJudgeService extends Service {
     private int mLastAction = -1;
     private boolean mIsSensorRunning;
 
-    private SensorManager mSensorManager;
     private Sensor mProximitySensor;
     private Context mContext;
-    private KeyguardManager mKeyguardManager;
+
+    @Inject
+    Provider<SensorManager> mSensorManagerProvider;
+
+    @Inject
+    Provider<NotificationManager> mNotificationManagerProvider;
+
+    @Inject
+    Provider<KeyguardManager> mKeyguardManagerProvider;
+
+    @Inject
+    Provider<PocketJudge> mPocketJudgeProvider;
 
     @Override
     public void onCreate() {
+        super.onCreate();
+
         if (DEBUG) Log.d(TAG, "Creating service");
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mProximitySensor = mSensorManagerProvider.get().getDefaultSensor(Sensor.TYPE_PROXIMITY);
         mProximityMaxRange = mProximitySensor.getMaximumRange();
 
         mContext = getApplicationContext();
@@ -90,17 +106,12 @@ public class PocketJudgeService extends Service {
         screenStateFilter.addAction(Intent.ACTION_USER_PRESENT);
         registerReceiver(mScreenStateReceiver, screenStateFilter);
 
-        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-
-        mNotificationManager = (NotificationManager)
-            mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-
         final NotificationChannel
             notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL,
                     mContext.getString(R.string.pocket_judge_title),
                     NotificationManager.IMPORTANCE_HIGH);
         notificationChannel.setSound(null, null);
-        mNotificationManager.createNotificationChannel(notificationChannel);
+        mNotificationManagerProvider.get().createNotificationChannel(notificationChannel);
     }
 
     @Override
@@ -133,15 +144,15 @@ public class PocketJudgeService extends Service {
             .setContentText(mContext.getString(R.string.pocket_judge_notif_msg));
 
         final Notification n = notificationBuilder.build();
-        mNotificationManager.notify(NOTIFICATION_ID, n);
+        mNotificationManagerProvider.get().notify(NOTIFICATION_ID, n);
     }
 
     private void removeNotification() {
-        mNotificationManager.cancelAll();
+        mNotificationManagerProvider.get().cancelAll();
     }
 
     private void setInPocket(final boolean active) {
-        PocketJudge.setInPocket(active);
+        mPocketJudgeProvider.get().setInPocket(active);
         if (active) {
             showNotification();
         } else {
@@ -156,7 +167,7 @@ public class PocketJudgeService extends Service {
 
         if (DEBUG) Log.d(TAG, "Disabling proximity sensor.");
 
-        mSensorManager.unregisterListener(mProximitySensorEventListener, mProximitySensor);
+        mSensorManagerProvider.get().unregisterListener(mProximitySensorEventListener, mProximitySensor);
         setInPocket(false);
         mIsSensorRunning = false;
         stopSafeDoorThreadPoll();
@@ -169,8 +180,8 @@ public class PocketJudgeService extends Service {
 
         if (DEBUG) Log.d(TAG, "Enabling proximity sensor.");
 
-        mSensorManager.registerListener(mProximitySensorEventListener, mProximitySensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManagerProvider.get().registerListener(mProximitySensorEventListener,
+                mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
         mIsSensorRunning = true;
     }
 
@@ -186,7 +197,7 @@ public class PocketJudgeService extends Service {
                         break;
                     }
 
-                    if (PocketJudge.isSafeDoorTriggered()) {
+                    if (mPocketJudgeProvider.get().isSafeDoorTriggered()) {
                         if (DEBUG) Log.d(TAG, "Thread(): SAFE DOOR TRIGGERED, " +
                                 "force unblocking touchscreen/buttons and disable sensor.");
                         disableSensor();
@@ -219,7 +230,8 @@ public class PocketJudgeService extends Service {
 
                 mLastAction = EVENT_TURN_ON_SCREEN;
 
-                if (!mKeyguardManager.isKeyguardLocked() || mLastAction == EVENT_UNLOCK) {
+                if (!mKeyguardManagerProvider.get().isKeyguardLocked()
+                        || mLastAction == EVENT_UNLOCK) {
                     if (DEBUG) Log.d(TAG, "ACTION_SCREEN_ON: Screen is on but no keyguard. " +
                             "Skipping sensor enable.");
                 } else {

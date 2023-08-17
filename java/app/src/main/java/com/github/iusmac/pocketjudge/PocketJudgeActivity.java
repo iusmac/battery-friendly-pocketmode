@@ -30,7 +30,10 @@ import android.os.Bundle;
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 import com.android.settingslib.widget.R;
 
-public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint(CollapsingToolbarBaseActivity.class)
+public class PocketJudgeActivity extends Hilt_PocketJudgeActivity {
     private final String TAG = getClass().getName();
 
     @Override
