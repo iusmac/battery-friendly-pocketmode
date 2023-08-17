@@ -48,7 +48,7 @@ public class PocketJudgeFragment extends PreferenceFragmentCompat
     private Preference mFooterPref;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
         mContext = getContext();
 
         addPreferencesFromResource(R.xml.pocketjudge_settings);
@@ -67,8 +67,8 @@ public class PocketJudgeFragment extends PreferenceFragmentCompat
     }
 
     @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        boolean isChecked = (Boolean) newValue;
+    public boolean onPreferenceChange(final Preference preference, final Object newValue) {
+        final boolean isChecked = (Boolean) newValue;
         if (isChecked) {
             PocketJudge.startService(mContext);
         } else {

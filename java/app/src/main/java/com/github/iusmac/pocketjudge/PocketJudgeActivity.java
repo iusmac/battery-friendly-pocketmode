@@ -34,7 +34,7 @@ public class PocketJudgeActivity extends CollapsingToolbarBaseActivity {
     private final String TAG = getClass().getName();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null) {

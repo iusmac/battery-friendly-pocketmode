@@ -41,11 +41,11 @@ public class PocketJudge {
     }
 
     public static boolean isSafeDoorTriggered() {
-        String raw = PocketJudgeUtils.readLine(POCKET_BRIDGE_INPOCKET_FILE);
+        final String raw = PocketJudgeUtils.readLine(POCKET_BRIDGE_INPOCKET_FILE);
         return "2".equals(raw);
     }
 
-    public static void setInPocket(boolean active) {
+    public static void setInPocket(final boolean active) {
         PocketJudgeUtils.writeValue(POCKET_BRIDGE_INPOCKET_FILE, active ? "1" : "0");
     }
 }

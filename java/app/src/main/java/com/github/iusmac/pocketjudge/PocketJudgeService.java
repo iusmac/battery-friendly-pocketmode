@@ -57,18 +57,18 @@ public class PocketJudgeService extends Service {
     private static final int EVENT_TURN_OFF_SCREEN = 0;
 
     private static final int NOTIFICATION_ID = 0x110110;
-    public static final String NOTIFICATION_CHANNEL = "pocketjudge_notification_channel";
-    private NotificationManager mNotificationManager = null;
+    private static final String NOTIFICATION_CHANNEL = "pocketjudge_notification_channel";
+    private NotificationManager mNotificationManager;
 
-    private boolean mVolBtnMusicControlsEnabled = false;
-    private boolean mVolumeWakeScreenEnabled = false;
+    private boolean mVolBtnMusicControlsEnabled;
+    private boolean mVolumeWakeScreenEnabled;
 
-    private Thread mSafeDoorThread = null;
-    private volatile boolean mIsSafeDoorThreadExit = false;
+    private Thread mSafeDoorThread;
+    private volatile boolean mIsSafeDoorThreadExit;
 
     private float mProximityMaxRange;
     private int mLastAction = -1;
-    private boolean mIsSensorRunning = false;
+    private boolean mIsSensorRunning;
 
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
@@ -84,20 +84,19 @@ public class PocketJudgeService extends Service {
 
         mContext = getApplicationContext();
 
-        IntentFilter screenStateFilter = new IntentFilter();
+        final IntentFilter screenStateFilter = new IntentFilter();
         screenStateFilter.addAction(Intent.ACTION_SCREEN_ON);
         screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF);
         screenStateFilter.addAction(Intent.ACTION_USER_PRESENT);
         registerReceiver(mScreenStateReceiver, screenStateFilter);
 
-        mKeyguardManager = (KeyguardManager)
-            mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
 
         mNotificationManager = (NotificationManager)
             mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel notificationChannel = new
-            NotificationChannel(NOTIFICATION_CHANNEL,
+        final NotificationChannel
+            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL,
                     mContext.getString(R.string.pocket_judge_title),
                     NotificationManager.IMPORTANCE_HIGH);
         notificationChannel.setSound(null, null);
@@ -105,38 +104,35 @@ public class PocketJudgeService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (DEBUG) Log.d(TAG, "Starting service");
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+        if (DEBUG) Log.d(TAG, "Starting service.");
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        if (DEBUG) Log.d(TAG, "Destroying service");
-        this.unregisterReceiver(mScreenStateReceiver);
+        if (DEBUG) Log.d(TAG, "Destroying service.");
+        unregisterReceiver(mScreenStateReceiver);
         super.onDestroy();
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(final Intent intent) {
         return null;
     }
 
     private void showNotification() {
-        Notification.Builder notificationBuilder;
-        notificationBuilder = new Notification.Builder(mContext,
-                NOTIFICATION_CHANNEL);
+        final Notification.Builder
+            notificationBuilder = new Notification.Builder(mContext, NOTIFICATION_CHANNEL);
 
         notificationBuilder.setSmallIcon(R.drawable.ic_pocket)
             .setShowWhen(false)
             .setAutoCancel(true)
             .setOngoing(true)
-            .setContentTitle(mContext
-                    .getString(R.string.pocket_judge_notif_title))
-            .setContentText(mContext
-                    .getString(R.string.pocket_judge_notif_msg));
+            .setContentTitle(mContext.getString(R.string.pocket_judge_notif_title))
+            .setContentText(mContext.getString(R.string.pocket_judge_notif_msg));
 
-        Notification n = notificationBuilder.build();
+        final Notification n = notificationBuilder.build();
         mNotificationManager.notify(NOTIFICATION_ID, n);
     }
 
@@ -144,7 +140,7 @@ public class PocketJudgeService extends Service {
         mNotificationManager.cancelAll();
     }
 
-    private void setInPocket(boolean active) {
+    private void setInPocket(final boolean active) {
         PocketJudge.setInPocket(active);
         if (active) {
             showNotification();
@@ -154,8 +150,12 @@ public class PocketJudgeService extends Service {
     }
 
     private void disableSensor() {
-        if (!mIsSensorRunning) return;
-        if (DEBUG) Log.d(TAG, "Disabling proximity sensor");
+        if (!mIsSensorRunning) {
+            return;
+        }
+
+        if (DEBUG) Log.d(TAG, "Disabling proximity sensor.");
+
         mSensorManager.unregisterListener(mProximitySensorEventListener, mProximitySensor);
         setInPocket(false);
         mIsSensorRunning = false;
@@ -163,8 +163,12 @@ public class PocketJudgeService extends Service {
     }
 
     private void enableSensor() {
-        if (mIsSensorRunning) return;
-        if (DEBUG) Log.d(TAG, "Enabling proximity sensor");
+        if (mIsSensorRunning) {
+            return;
+        }
+
+        if (DEBUG) Log.d(TAG, "Enabling proximity sensor.");
+
         mSensorManager.registerListener(mProximitySensorEventListener, mProximitySensor,
                 SensorManager.SENSOR_DELAY_NORMAL);
         mIsSensorRunning = true;
@@ -183,16 +187,14 @@ public class PocketJudgeService extends Service {
                     }
 
                     if (PocketJudge.isSafeDoorTriggered()) {
-                        if (DEBUG)
-                            Log.d(TAG, "Thread(): SAFE DOOR TRIGGERED, " +
-                                "force unblocking touchscreen/buttons and disable sensor");
+                        if (DEBUG) Log.d(TAG, "Thread(): SAFE DOOR TRIGGERED, " +
+                                "force unblocking touchscreen/buttons and disable sensor.");
                         disableSensor();
                         break;
                     }
 
                     try {
-                        final int hundredMillisecond = 200;
-                        Thread.sleep(hundredMillisecond);
+                        Thread.sleep(/*millis=*/ 200);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -211,17 +213,15 @@ public class PocketJudgeService extends Service {
 
     private BroadcastReceiver mScreenStateReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_ON");
-                final int oldAction = mLastAction;
+                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_ON.");
+
                 mLastAction = EVENT_TURN_ON_SCREEN;
 
-                if (!mKeyguardManager.isKeyguardLocked()
-                        || oldAction == EVENT_UNLOCK) {
-                    if (DEBUG) Log.d(TAG,
-                            "ACTION_SCREEN_ON: Screen is on but no keyguard. " +
-                            "Skipping sensor enable");
+                if (!mKeyguardManager.isKeyguardLocked() || mLastAction == EVENT_UNLOCK) {
+                    if (DEBUG) Log.d(TAG, "ACTION_SCREEN_ON: Screen is on but no keyguard. " +
+                            "Skipping sensor enable.");
                 } else {
                     enableSensor();
                 }
@@ -234,6 +234,7 @@ public class PocketJudgeService extends Service {
                 }
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_OFF");
+
                 mLastAction = EVENT_TURN_OFF_SCREEN;
                 disableSensor();
                 mVolBtnMusicControlsEnabled = LineageSettings.System.getIntForUser(
@@ -251,12 +252,13 @@ public class PocketJudgeService extends Service {
                     return;
                 }
 
-                // Force wake screen with volume keys if volume buttons should
-                // not seek media tracks
+                // Force wake screen with volume keys if volume buttons should not seek media
+                // tracks
                 LineageSettings.System.putIntForUser(mContext.getContentResolver(),
                         LineageSettings.System.VOLUME_WAKE_SCREEN, 1, UserHandle.USER_CURRENT);
             } else if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
-                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_USER_PRESENT");
+                if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_USER_PRESENT.");
+
                 mLastAction = EVENT_UNLOCK;
                 disableSensor();
             }
@@ -265,34 +267,33 @@ public class PocketJudgeService extends Service {
 
     public SensorEventListener mProximitySensorEventListener = new SensorEventListener() {
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) { }
+        public void onAccuracyChanged(final Sensor sensor, final int accuracy) { }
 
         @Override
-        public void onSensorChanged(SensorEvent event) {
+        public void onSensorChanged(final SensorEvent event) {
             try {
                 if (event == null) {
                     if (DEBUG) Log.d(TAG, "Event is null!");
                 } else if (event.values == null || event.values.length == 0) {
-                    if (DEBUG)
-                        Log.d(TAG, "Event has no values! event.values null ? " +
+                    if (DEBUG) Log.d(TAG, "Event has no values! event.values null ? " +
                                 (event.values == null));
                 } else {
                     final float value = event.values[0];
                     final boolean isPositive = event.values[0] < mProximityMaxRange;
+
                     if (DEBUG) {
                         final long time = SystemClock.uptimeMillis();
-                        Log.d(TAG, "Event: time=" + time + ", value=" + value
-                                + ", maxRange=" + mProximityMaxRange + ", isPositive=" + isPositive);
+                        Log.d(TAG, "Event: time=" + time + ", value=" + value + ", maxRange="
+                                + mProximityMaxRange + ", isPositive=" + isPositive);
                     }
+
                     if (isPositive) {
-                        if (PhoneStateReceiver.CUR_STATE ==
-                                PhoneStateReceiver.IDLE) {
+                        if (PhoneStateReceiver.CUR_STATE == PhoneStateReceiver.IDLE) {
                             if (DEBUG) Log.d(TAG, "onSensorChanged(): COVERED, " +
                                     "blocking touchscreen and buttons");
                             setInPocket(true);
 
-                            // We're in pocket, start listen for safe-door
-                            // state
+                            // We're in pocket, start listen for safe-door state
                             if (null == mSafeDoorThread) {
                                 startSafeDoorThreadPoll();
                             }
