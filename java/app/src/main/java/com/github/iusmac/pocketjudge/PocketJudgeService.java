@@ -45,10 +45,6 @@ import android.util.Log;
 
 import com.github.iusmac.pocketjudge.receiver.PhoneStateReceiver;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import lineageos.providers.LineageSettings;
 
 import static com.github.iusmac.pocketjudge.BuildConfig.DEBUG;
@@ -74,7 +70,6 @@ public class PocketJudgeService extends Service {
     private int mLastAction = -1;
     private boolean mIsSensorRunning = false;
 
-    private ExecutorService mExecutorService;
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
     private Context mContext;
@@ -85,7 +80,6 @@ public class PocketJudgeService extends Service {
         if (DEBUG) Log.d(TAG, "Creating service");
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        mExecutorService = Executors.newSingleThreadExecutor();
         mProximityMaxRange = mProximitySensor.getMaximumRange();
 
         mContext = getApplicationContext();
@@ -128,10 +122,6 @@ public class PocketJudgeService extends Service {
         return null;
     }
 
-    private Future<?> submit(Runnable runnable) {
-        return mExecutorService.submit(runnable);
-    }
-
     private void showNotification() {
         Notification.Builder notificationBuilder;
         notificationBuilder = new Notification.Builder(mContext,
@@ -166,23 +156,18 @@ public class PocketJudgeService extends Service {
     private void disableSensor() {
         if (!mIsSensorRunning) return;
         if (DEBUG) Log.d(TAG, "Disabling proximity sensor");
-        submit(() -> {
-            mSensorManager.unregisterListener(mProximitySensorEventListener,
-                    mProximitySensor);
-            setInPocket(false);
-            mIsSensorRunning = false;
-            stopSafeDoorThreadPoll();
-        });
+        mSensorManager.unregisterListener(mProximitySensorEventListener, mProximitySensor);
+        setInPocket(false);
+        mIsSensorRunning = false;
+        stopSafeDoorThreadPoll();
     }
 
     private void enableSensor() {
         if (mIsSensorRunning) return;
         if (DEBUG) Log.d(TAG, "Enabling proximity sensor");
-        submit(() -> {
-            mSensorManager.registerListener(mProximitySensorEventListener,
-                    mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-            mIsSensorRunning = true;
-        });
+        mSensorManager.registerListener(mProximitySensorEventListener, mProximitySensor,
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mIsSensorRunning = true;
     }
 
     private void startSafeDoorThreadPoll() {
@@ -241,42 +226,35 @@ public class PocketJudgeService extends Service {
                     enableSensor();
                 }
 
-                submit(() -> {
-                    // Disable force wake screen with volume keys if the user
-                    // doesn't want it
-                    if (!mVolBtnMusicControlsEnabled && !mVolumeWakeScreenEnabled) {
-                        LineageSettings.System.putIntForUser(mContext.getContentResolver(),
-                                LineageSettings.System.VOLUME_WAKE_SCREEN, 0,
-                                UserHandle.USER_CURRENT);
-                    }
-                });
+                // Disable force wake screen with volume keys if the user
+                // doesn't want it
+                if (!mVolBtnMusicControlsEnabled && !mVolumeWakeScreenEnabled) {
+                    LineageSettings.System.putIntForUser(mContext.getContentResolver(),
+                            LineageSettings.System.VOLUME_WAKE_SCREEN, 0, UserHandle.USER_CURRENT);
+                }
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_SCREEN_OFF");
                 mLastAction = EVENT_TURN_OFF_SCREEN;
                 disableSensor();
-                submit(() -> {
-                    mVolBtnMusicControlsEnabled = LineageSettings.System.getIntForUser(
-                            mContext.getContentResolver(),
-                            LineageSettings.System.VOLBTN_MUSIC_CONTROLS, 0,
-                            UserHandle.USER_CURRENT) != 0;
-                    if (mVolBtnMusicControlsEnabled) {
-                        return;
-                    }
+                mVolBtnMusicControlsEnabled = LineageSettings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        LineageSettings.System.VOLBTN_MUSIC_CONTROLS, 0,
+                        UserHandle.USER_CURRENT) != 0;
+                if (mVolBtnMusicControlsEnabled) {
+                    return;
+                }
 
-                    mVolumeWakeScreenEnabled = LineageSettings.System.getIntForUser(
-                            mContext.getContentResolver(),
-                            LineageSettings.System.VOLUME_WAKE_SCREEN, 0,
-                            UserHandle.USER_CURRENT) != 0;
-                    if (mVolumeWakeScreenEnabled) {
-                        return;
-                    }
+                mVolumeWakeScreenEnabled = LineageSettings.System.getIntForUser(
+                        mContext.getContentResolver(), LineageSettings.System.VOLUME_WAKE_SCREEN,
+                        0, UserHandle.USER_CURRENT) != 0;
+                if (mVolumeWakeScreenEnabled) {
+                    return;
+                }
 
-                    // Force wake screen with volume keys if volume buttons should
-                    // not seek media tracks
-                    LineageSettings.System.putIntForUser(mContext.getContentResolver(),
-                            LineageSettings.System.VOLUME_WAKE_SCREEN, 1,
-                            UserHandle.USER_CURRENT);
-                });
+                // Force wake screen with volume keys if volume buttons should
+                // not seek media tracks
+                LineageSettings.System.putIntForUser(mContext.getContentResolver(),
+                        LineageSettings.System.VOLUME_WAKE_SCREEN, 1, UserHandle.USER_CURRENT);
             } else if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
                 if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_USER_PRESENT");
                 mLastAction = EVENT_UNLOCK;
