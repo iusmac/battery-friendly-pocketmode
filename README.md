@@ -1,4 +1,6 @@
-# Battery-friendly Pocket Mode At Kernel Level [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+# Battery-friendly Pocket Mode At Kernel Level
+
+![GitHub Licence](https://img.shields.io/github/license/iusmac/battery-friendly-pocketmode?style=for-the-badge) ![GitHub release (latest SemVer)](https://img.shields.io/github/v/tag/iusmac/battery-friendly-pocketmode?sort=semver&style=for-the-badge&logo=hackthebox&color=blue&logoColor=aliceblue)
 
 Settings › Display › Pocket detection | Demo
 :------------------------------------:|:-----:
