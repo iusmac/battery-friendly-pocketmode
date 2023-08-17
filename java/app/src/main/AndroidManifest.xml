@@ -26,6 +26,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     package="com.github.iusmac.pocketjudge"
     android:sharedUserId="android.uid.system"
     android:versionCode="1"
@@ -43,7 +44,8 @@
 
         <receiver android:name=".receiver.BootCompletedReceiver"
             android:exported="false"
-            android:directBootAware="true">
+            android:directBootAware="true"
+            androidprv:systemUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
             </intent-filter>
@@ -51,7 +53,8 @@
 
         <receiver android:name=".receiver.PhoneStateReceiver"
             android:exported="false"
-            android:directBootAware="true">
+            android:directBootAware="true"
+            androidprv:systemUserOnly="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -61,7 +64,8 @@
         <service
             android:name=".PocketJudgeService"
             android:exported="false"
-            android:directBootAware="true">
+            android:directBootAware="true"
+            androidprv:systemUserOnly="true">
         </service>
 
         <!-- use theme as setting remove android:theme if not need it -->
