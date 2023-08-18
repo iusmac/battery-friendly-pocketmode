@@ -29,6 +29,11 @@ This pocket mode implementation is a fork of [Battery-friendly Pocketmode](https
 7. New settings layout, with demo and instructions to improve UX
 8. Minor bug fixes discovered in previous pocket mode implementation
 
+## Requirements
+_(Compile)_ Android 13 (API level 33) code base
+
+_(Launch)_ Android 12+ (API level 31+)
+
 ## How to implement
 ### Android-side
 1. Create a directory named `PocketJudge` (or whatever you want to call it) in your DT (device tree)
