@@ -1,0 +1,13 @@
+/fwb
+!/.gitignore
+!/fetch.sh
+/CollapsingToolbarBaseActivity/*
+!/CollapsingToolbarBaseActivity/build.gradle
+/FooterPreference/*
+!/FooterPreference/build.gradle
+/LayoutPreference/*
+!/LayoutPreference/build.gradle
+/SettingsTheme/*
+!/SettingsTheme/build.gradle
+/Utils/*
+!/Utils/build.gradle

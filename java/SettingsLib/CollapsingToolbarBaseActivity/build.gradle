@@ -3,13 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.android.settingslib.widget'
-
-    compileSdk 33
+    namespace 'com.android.settingslib.collapsingtoolbar'
 
     defaultConfig {
         minSdk 29
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
     }
@@ -17,7 +15,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -28,19 +25,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_9
-        targetCompatibility JavaVersion.VERSION_1_9
-    }
-
-    afterEvaluate {
-        generateReleaseBuildConfig.enabled = false
-        generateDebugBuildConfig.enabled = false
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     sourceSets {
         main {
-            res.srcDirs = ['res']
-            java.srcDirs = ['src']
+            res.srcDirs = ['../fwb/packages/SettingsLib/CollapsingToolbarBaseActivity/res']
+            java.srcDirs = ['../fwb/packages/SettingsLib/CollapsingToolbarBaseActivity/src']
         }
     }
 }

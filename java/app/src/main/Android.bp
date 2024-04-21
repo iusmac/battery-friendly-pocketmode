@@ -1,14 +1,15 @@
 android_app {
     name: "PocketJudge",
 
-    min_sdk_version: "31",
-    target_sdk_version: "33",
+    min_sdk_version: "34",
+    target_sdk_version: "34",
 
     srcs: [
         "java/**/*.java",
         "gen/**/*.java",
 
     ],
+    use_resource_processor: true,
     resource_dirs: ["res"],
     certificate: "platform",
     platform_apis: true,
@@ -25,11 +26,13 @@ android_app {
     ],
 
     optimize: {
+        optimize: true,
         proguard_flags_files: ["proguard.flags"],
     },
 
     required: [
         "vendor.com.github.iusmac.pocketjudge.rc",
+        "privapp_whitelist_com.github.iusmac.pocketjudge.xml",
     ],
 }
 
@@ -38,4 +41,11 @@ prebuilt_etc {
     src: "vendor.com.github.iusmac.pocketjudge.rc",
     sub_dir: "init",
     vendor: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.github.iusmac.pocketjudge.xml",
+    src: "privapp_whitelist_com.github.iusmac.pocketjudge.xml",
+    sub_dir: "permissions",
+    system_ext_specific: true,
 }

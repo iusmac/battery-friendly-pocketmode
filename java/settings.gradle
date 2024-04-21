@@ -6,6 +6,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id 'com.android.settings' version '8.1.4'
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
@@ -22,3 +26,10 @@ include ':SettingsLib:FooterPreference'
 include ':SettingsLib:LayoutPreference'
 include ':SettingsLib:SettingsTheme'
 include ':SettingsLib:Utils'
+
+android {
+    compileSdk 34
+    minSdk 34
+    // TODO: b/317358817 com.android.settings plugin doesn't recognize targetSdk
+    // targetSdk 34
+}
