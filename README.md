@@ -30,7 +30,7 @@ This pocket mode implementation is a fork of [Battery-friendly Pocketmode](https
 8. Minor bug fixes discovered in previous pocket mode implementation
 
 ## Requirements
-_(Compile)_ Android 13 (API level 33) code base
+_(Compile)_ Android 14 (API level 34) code base
 
 _(Launch)_ Android 12+ (API level 31+)
 
