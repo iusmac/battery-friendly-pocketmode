@@ -14,8 +14,8 @@ android {
         applicationId 'com.github.iusmac.pocketjudge'
         minSdk 31
         targetSdk 34
-        versionCode 3
-        versionName '2.0'
+        versionCode 4
+        versionName '2.0.1'
     }
 
     signingConfigs {
