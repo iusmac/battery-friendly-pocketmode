@@ -77,6 +77,7 @@ public class PocketJudgeService extends Hilt_PocketJudgeService {
 
     private Sensor mProximitySensor;
     private Context mContext;
+    private boolean mLineageSettingsSupported;
 
     @Inject
     Provider<SensorManager> mSensorManagerProvider;
@@ -99,6 +100,9 @@ public class PocketJudgeService extends Hilt_PocketJudgeService {
         mProximityMaxRange = mProximitySensor.getMaximumRange();
 
         mContext = getApplicationContext();
+
+        mLineageSettingsSupported = mContext.getContentResolver()
+            .acquireProvider(LineageSettings.AUTHORITY) != null;
 
         final IntentFilter screenStateFilter = new IntentFilter();
         screenStateFilter.addAction(Intent.ACTION_SCREEN_ON);
@@ -240,7 +244,8 @@ public class PocketJudgeService extends Hilt_PocketJudgeService {
 
                 // Disable force wake screen with volume keys if the user
                 // doesn't want it
-                if (!mVolBtnMusicControlsEnabled && !mVolumeWakeScreenEnabled) {
+                if (!mVolBtnMusicControlsEnabled && !mVolumeWakeScreenEnabled &&
+                        mLineageSettingsSupported) {
                     LineageSettings.System.putIntForUser(mContext.getContentResolver(),
                             LineageSettings.System.VOLUME_WAKE_SCREEN, 0, UserHandle.USER_CURRENT);
                 }
@@ -249,25 +254,27 @@ public class PocketJudgeService extends Hilt_PocketJudgeService {
 
                 mLastAction = EVENT_TURN_OFF_SCREEN;
                 disableSensor();
-                mVolBtnMusicControlsEnabled = LineageSettings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        LineageSettings.System.VOLBTN_MUSIC_CONTROLS, 0,
-                        UserHandle.USER_CURRENT) != 0;
-                if (mVolBtnMusicControlsEnabled) {
-                    return;
-                }
+                if (mLineageSettingsSupported) {
+                    mVolBtnMusicControlsEnabled = LineageSettings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            LineageSettings.System.VOLBTN_MUSIC_CONTROLS, 0,
+                            UserHandle.USER_CURRENT) != 0;
+                    if (mVolBtnMusicControlsEnabled) {
+                        return;
+                    }
 
-                mVolumeWakeScreenEnabled = LineageSettings.System.getIntForUser(
-                        mContext.getContentResolver(), LineageSettings.System.VOLUME_WAKE_SCREEN,
-                        0, UserHandle.USER_CURRENT) != 0;
-                if (mVolumeWakeScreenEnabled) {
-                    return;
-                }
+                    mVolumeWakeScreenEnabled = LineageSettings.System.getIntForUser(
+                            mContext.getContentResolver(), LineageSettings.System.VOLUME_WAKE_SCREEN,
+                            0, UserHandle.USER_CURRENT) != 0;
+                    if (mVolumeWakeScreenEnabled) {
+                        return;
+                    }
 
-                // Force wake screen with volume keys if volume buttons should not seek media
-                // tracks
-                LineageSettings.System.putIntForUser(mContext.getContentResolver(),
-                        LineageSettings.System.VOLUME_WAKE_SCREEN, 1, UserHandle.USER_CURRENT);
+                    // Force wake screen with volume keys if volume buttons should not seek media
+                    // tracks
+                    LineageSettings.System.putIntForUser(mContext.getContentResolver(),
+                            LineageSettings.System.VOLUME_WAKE_SCREEN, 1, UserHandle.USER_CURRENT);
+                }
             } else if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
                 if (DEBUG) Log.d(TAG, "Receiving screen intent: ACTION_USER_PRESENT.");
 
